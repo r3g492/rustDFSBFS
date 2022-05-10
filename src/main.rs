@@ -11,7 +11,11 @@ fn main() {
 
     MyGrid::print_grid(&my_grid);
 
-    MyGrid::dfs_next(&mut my_grid);
+    MyGrid::dfs(&mut my_grid);
     //
+    MyGrid::print_grid(&my_grid);
+
+    MyGrid::clear(&mut my_grid);
+
     MyGrid::print_grid(&my_grid);
 }

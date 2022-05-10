@@ -5,7 +5,8 @@ pub struct MyGrid {
     width : usize,
     height : usize,
     pub cur: (usize, usize),
-    pub dst : (usize, usize)
+    pub dst : (usize, usize),
+    pub route : LinkedList<(usize, usize)>,
 }
 impl MyGrid {
     pub fn new(height: usize, width: usize) -> MyGrid {
@@ -14,16 +15,34 @@ impl MyGrid {
             let mut row = vec![0 ; width];
             column.push(row);
         }
+        let list: LinkedList<(usize, usize)> = LinkedList::new();
         let mut my_grid = MyGrid {
             grid: column,
             width,
             height,
             cur: (0, 0),
             dst : (height - 1, width - 1),
+            route : list,
         };
         my_grid.grid[0][0] = 2;
         my_grid.grid[height - 1][width - 1] = 3;
         return my_grid;
+    }
+    pub fn clear(&mut self) {
+        for i in 0..self.height {
+            for j in 0..self.width {
+                self.grid[i][j] = 0;
+            }
+        }
+        self.cur.0 = 0;
+        self.cur.1 = 0;
+        self.grid[self.cur.0][self.cur.1] = 2;
+
+        self.dst.0 = self.height - 1;
+        self.dst.1 = self.width - 1;
+        self.grid[self.dst.0][self.dst.1] = 3;
+
+        self.route.clear();
     }
     pub fn print_grid(&self) {
         println!();
@@ -53,17 +72,18 @@ impl MyGrid {
         self.dst.0 = new_dst_x;
         self.dst.1 = new_dst_y;
     }
-    pub fn dfs_next(&mut self) {
+    pub fn dfs(&mut self) {
         let mut linked_list: LinkedList<(usize, usize)> = LinkedList::new();
         linked_list.push_front(self.cur);
 
         while !linked_list.is_empty() {
             let pop_point : (usize, usize) = linked_list.pop_front().unwrap();
             println!("{} {}", pop_point.0, pop_point.1);
+            self.route.push_front((pop_point.0, pop_point.1));
             if pop_point.0 == self.dst.0 && pop_point.1 == self.dst.1 {
                 return;
             }
-            self.grid[pop_point.0][pop_point.1] = 1;
+            self.grid[pop_point.0][pop_point.1] = 4;
 
             let next_x = pop_point.0 + 1;
             let next_y = pop_point.1;
@@ -92,20 +112,20 @@ impl MyGrid {
                 }
             }
         }
+        return;
     }
-
-    pub fn bfs_next(&mut self) {
+    pub fn bfs(&mut self) {
         let mut linked_list: LinkedList<(usize, usize)> = LinkedList::new();
         linked_list.push_front(self.cur);
 
         while !linked_list.is_empty() {
             let pop_point : (usize, usize) = linked_list.pop_back().unwrap();
             println!("{} {}", pop_point.0, pop_point.1);
-
+            self.route.push_front((pop_point.0, pop_point.1));
             if pop_point.0 == self.dst.0 && pop_point.1 == self.dst.1 {
                 return;
             }
-            self.grid[pop_point.0][pop_point.1] = 1;
+            self.grid[pop_point.0][pop_point.1] = 4;
 
             let next_x = pop_point.0 + 1;
             let next_y = pop_point.1;
@@ -134,6 +154,7 @@ impl MyGrid {
                 }
             }
         }
+        return;
     }
     pub fn is_address_valid(&self, x : usize, y : usize) -> bool {
         if x >= 0 && x < self.height && y >= 0 && y < self.width {
@@ -145,5 +166,13 @@ impl MyGrid {
             }
         }
         return false;
+    }
+
+    pub fn pop_route(&mut self) -> (usize, usize){
+        if !self.route.is_empty() {
+            let answer : (usize, usize) = self.route.pop_front().unwrap();
+            return answer;
+        }
+        return (999, 999);
     }
 }
